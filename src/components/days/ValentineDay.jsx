@@ -15,52 +15,52 @@ function ValentineDay({ onBack }) {
   // ============================================
   const slideshowImages = [
     {
-      src: 'public/images/1.jpg',
+      src: 'images/1.jpg',
       caption: 'Do you remember our first trip to Nandi Hills? ✨',
       title: 'Nandi Hills'
     },
     {
-      src: 'public/images/2.jpg',
+      src: 'images/2.jpg',
       caption: 'Our first trip together to Munnar 💕',
       title: 'Our First Trip Together'
     },
     {
-      src: 'public/images/3.jpg',
+      src: 'images/3.jpg',
       caption: 'This photo feels like we did pre-wedding shoot before we actually did it',
       title: 'Pre-wedding Shoot'
     },
     {
-      src: 'public/images/4.jpg',
+      src: 'images/4.jpg',
       caption: 'When I said "I love you" and meant it with all my heart ❤️',
       title: 'Munnar Trip'
     },
     {
-      src: 'public/images/5.jpeg',
+      src: 'images/5.jpeg',
       caption: 'Adventures together that made beautiful memories 🌟',
       title: 'Gokarna Trip'
     },
     {
-      src: 'public/images/6.jpeg',
+      src: 'images/6.jpeg',
       caption: 'Do you remember our date at Oia? 🌅',
       title: 'Oia'
     },
     {
-      src: 'public/images/7.jpeg',
+      src: 'images/7.jpeg',
       caption: 'Quiet moments that spoke volumes about our love 🌙',
       title: 'Peaceful Moments'
     },
     {
-      src: 'public/images/8.jpeg',
+      src: 'images/8.jpeg',
       caption: 'Celebrating your birthday with all my love 🎉',
       title: 'Happy Birthday'
     },
     {
-      src: 'public/images/9.jpeg',
+      src: 'images/9.jpeg',
       caption: 'Supporting each other through thick and thin 💪',
       title: 'Together Strong'
     },
     {
-      src: 'public/images/10.jpeg',
+      src: 'images/10.jpeg',
       caption: 'Looking forward to forever with you 💖',
       title: 'Our Future'
     }
