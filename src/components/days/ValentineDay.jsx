@@ -1,49 +1,71 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import './ValentineDay.css'
 
 function ValentineDay({ onBack }) {
-  const [stage, setStage] = useState('envelope') // envelope → timeline → lovejar → final
+  const [stage, setStage] = useState('envelope') // envelope → slideshow → lovejar → final
   const [envelopeOpened, setEnvelopeOpened] = useState(false)
-  const [timelineIndex, setTimelineIndex] = useState(0)
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true)
   const [collectedNotes, setCollectedNotes] = useState([])
   const [showConfetti, setShowConfetti] = useState(false)
+  const [loadedImages, setLoadedImages] = useState({})
 
-  const timelineMemories = [
+  // ============================================
+  // EDIT YOUR IMAGE CAPTIONS HERE
+  // ============================================
+  const slideshowImages = [
     {
-      title: 'First Meeting',
-      date: 'The Day It All Began',
-      emoji: '✨',
-      note: 'The moment I first saw you, time stood still. I knew right then that you were someone extraordinary, someone who would change my life forever.',
-      imagePlaceholder: true
+      src: 'public/images/1.jpg',
+      caption: 'Do you remember our first trip to Nandi Hills? ✨',
+      title: 'Nandi Hills'
     },
     {
-      title: 'First Date',
-      date: 'Our Beautiful Beginning',
-      emoji: '💕',
-      note: 'Every moment of our first date is etched in my memory. Your laugh, your smile, the way you made me feel - it was perfect. I went home that night knowing I was falling for you.',
-      imagePlaceholder: true
+      src: 'public/images/2.jpg',
+      caption: 'Our first trip together to Munnar 💕',
+      title: 'Our First Trip Together'
     },
     {
-      title: 'First Kiss',
-      date: 'When Time Stopped',
-      emoji: '💋',
-      note: 'Our first kiss took my breath away. In that moment, everything felt right in the world. I realized that your lips are my favorite place to be.',
-      imagePlaceholder: true
+      src: 'public/images/3.jpg',
+      caption: 'This photo feels like we did pre-wedding shoot before we actually did it',
+      title: 'Pre-wedding Shoot'
     },
     {
-      title: 'First "I Love You"',
-      date: 'Three Words, Infinite Meaning',
-      emoji: '❤️',
-      note: 'Saying "I love you" for the first time was both scary and liberating. But with you, it felt like the most natural thing in the world. Because I do, Megha. I love you so much.',
-      imagePlaceholder: true
+      src: 'public/images/4.jpg',
+      caption: 'When I said "I love you" and meant it with all my heart ❤️',
+      title: 'Munnar Trip'
     },
     {
-      title: 'Our Adventures Together',
-      date: 'Making Memories',
-      emoji: '🌟',
-      note: 'From spontaneous trips to quiet nights in, every adventure with you is my favorite. You turn ordinary moments into extraordinary memories.',
-      imagePlaceholder: true
+      src: 'public/images/5.jpeg',
+      caption: 'Adventures together that made beautiful memories 🌟',
+      title: 'Gokarna Trip'
+    },
+    {
+      src: 'public/images/6.jpeg',
+      caption: 'Do you remember our date at Oia? 🌅',
+      title: 'Oia'
+    },
+    {
+      src: 'public/images/7.jpeg',
+      caption: 'Quiet moments that spoke volumes about our love 🌙',
+      title: 'Peaceful Moments'
+    },
+    {
+      src: 'public/images/8.jpeg',
+      caption: 'Celebrating your birthday with all my love 🎉',
+      title: 'Happy Birthday'
+    },
+    {
+      src: 'public/images/9.jpeg',
+      caption: 'Supporting each other through thick and thin 💪',
+      title: 'Together Strong'
+    },
+    {
+      src: 'public/images/10.jpeg',
+      caption: 'Looking forward to forever with you 💖',
+      title: 'Our Future'
     }
   ]
+  // ============================================
 
   const loveNotes = [
     'Your smile lights up my entire world ☀️',
@@ -63,30 +85,56 @@ function ValentineDay({ onBack }) {
     'How you\'re my best friend and my love 👫'
   ]
 
+  // Preload all images when entering slideshow stage
+  useEffect(() => {
+    if (stage === 'slideshow') {
+      slideshowImages.forEach((slide, index) => {
+        const img = new Image()
+        img.onload = () => {
+          setLoadedImages(prev => ({ ...prev, [index]: true }))
+        }
+        img.onerror = () => {
+          setLoadedImages(prev => ({ ...prev, [index]: true }))
+        }
+        img.src = slide.src
+      })
+    }
+  }, [stage])
+
+  // Auto-advance slideshow
+  useEffect(() => {
+    if (stage === 'slideshow' && isAutoPlaying) {
+      const timer = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % slideshowImages.length)
+      }, 4000) // Change slide every 4 seconds
+      return () => clearInterval(timer)
+    }
+  }, [stage, isAutoPlaying, slideshowImages.length])
+
   const handleEnvelopeClick = () => {
     setEnvelopeOpened(true)
     setTimeout(() => {
-      setStage('timeline')
+      setStage('slideshow')
     }, 1000)
   }
 
-  const handleTimelineNext = () => {
-    if (timelineIndex < timelineMemories.length - 1) {
-      setTimelineIndex(timelineIndex + 1)
-    } else {
-      setStage('lovejar')
-    }
+  const goToSlide = (index) => {
+    setCurrentSlide(index)
+    setIsAutoPlaying(false)
   }
 
-  const handleTimelinePrevious = () => {
-    if (timelineIndex > 0) {
-      setTimelineIndex(timelineIndex - 1)
-    }
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % slideshowImages.length)
+    setIsAutoPlaying(false)
+  }
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + slideshowImages.length) % slideshowImages.length)
+    setIsAutoPlaying(false)
   }
 
   const handlePullNote = () => {
     if (collectedNotes.length < loveNotes.length) {
-      // Random note that hasn't been collected
       const availableNotes = loveNotes.filter((_, index) => !collectedNotes.includes(index))
       const randomIndex = Math.floor(Math.random() * availableNotes.length)
       const noteIndex = loveNotes.findIndex((note, i) => note === availableNotes[randomIndex] && !collectedNotes.includes(i))
@@ -123,8 +171,8 @@ function ValentineDay({ onBack }) {
   // Envelope Stage
   if (stage === 'envelope') {
     return (
-      <div className="container">
-        <div className="card">
+      <div className="container liquid-glass-bg">
+        <div className="card liquid-glass">
           <h1 className="title">Valentine's Day 💕</h1>
           <p className="subtitle">
             Megha, I have something very special for you...
@@ -133,75 +181,97 @@ function ValentineDay({ onBack }) {
           {/* Envelope */}
           <div
             onClick={handleEnvelopeClick}
+            className="envelope-wrapper"
             style={{
-              width: '280px',
-              height: '180px',
+              width: '320px',
+              height: '220px',
               margin: '40px auto',
               position: 'relative',
               cursor: 'pointer',
-              transform: envelopeOpened ? 'scale(1.1)' : 'scale(1)',
-              transition: 'transform 0.5s ease'
+              perspective: '1000px'
             }}
           >
             {/* Envelope body */}
-            <div style={{
+            <div className={`envelope-body ${envelopeOpened ? 'opened' : ''}`} style={{
               width: '100%',
               height: '100%',
-              background: 'linear-gradient(135deg, #ffe0f0 0%, #ffd4e0 100%)',
-              borderRadius: '10px',
+              background: 'linear-gradient(135deg, rgba(255, 224, 240, 0.8) 0%, rgba(255, 212, 224, 0.8) 100%)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: '15px',
               position: 'relative',
-              boxShadow: '0 10px 30px rgba(255, 107, 157, 0.3)',
-              border: '3px solid #ff99cc'
+              boxShadow: '0 15px 40px rgba(255, 107, 157, 0.4)',
+              border: '2px solid rgba(255, 255, 255, 0.6)',
+              transition: 'all 0.3s ease',
+              transform: envelopeOpened ? 'scale(0.95)' : 'scale(1)',
             }}>
               <div style={{
                 position: 'absolute',
                 top: '50%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
-                fontSize: '4rem'
+                fontSize: '5rem',
+                animation: envelopeOpened ? 'none' : 'envelopeBounce 2s ease-in-out infinite'
               }}>
                 💌
               </div>
             </div>
 
             {/* Envelope flap */}
-            <div style={{
+            <div className={`envelope-flap ${envelopeOpened ? 'opened' : ''}`} style={{
               position: 'absolute',
               top: '0',
               left: '0',
               width: '100%',
-              height: '50%',
-              background: 'linear-gradient(135deg, #ffb3d9 0%, #ff99cc 100%)',
-              clipPath: 'polygon(0 0, 50% 70%, 100% 0)',
-              transformOrigin: 'top',
-              transform: envelopeOpened ? 'rotateX(180deg)' : 'rotateX(0deg)',
-              transition: 'transform 0.8s ease',
-              boxShadow: envelopeOpened ? 'none' : '0 5px 15px rgba(255, 107, 157, 0.3)',
-              border: '3px solid #ff6b9d',
+              height: '55%',
+              background: 'linear-gradient(135deg, rgba(255, 179, 217, 0.9) 0%, rgba(255, 153, 204, 0.9) 100%)',
+              backdropFilter: 'blur(10px)',
+              clipPath: 'polygon(0 0, 50% 75%, 100% 0)',
+              transformOrigin: 'top center',
+              transform: envelopeOpened ? 'rotateX(180deg) translateZ(10px)' : 'rotateX(0deg)',
+              transition: 'transform 1s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+              boxShadow: envelopeOpened ? 'none' : '0 8px 20px rgba(255, 107, 157, 0.4)',
+              border: '2px solid rgba(255, 255, 255, 0.6)',
               borderBottom: 'none'
             }} />
 
             {/* Seal */}
             {!envelopeOpened && (
-              <div style={{
+              <div className="envelope-seal" style={{
                 position: 'absolute',
-                top: '23%',
+                top: '26%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
-                width: '60px',
-                height: '60px',
-                background: '#ffd700',
+                width: '70px',
+                height: '70px',
+                background: 'linear-gradient(135deg, rgba(255, 215, 0, 1) 0%, rgba(255, 200, 0, 0.9) 100%)',
+                backdropFilter: 'blur(5px)',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '2rem',
-                boxShadow: '0 4px 12px rgba(255, 215, 0, 0.4)',
-                border: '3px solid #ffed4e',
-                zIndex: 10
+                fontSize: '2.2rem',
+                boxShadow: '0 6px 16px rgba(255, 215, 0, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.4)',
+                border: '2px solid rgba(255, 255, 255, 0.7)',
+                zIndex: 10,
+                animation: 'sealPulse 2s ease-in-out infinite'
               }}>
                 ❤️
               </div>
+            )}
+
+            {/* Inner letter glow */}
+            {envelopeOpened && (
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '200px',
+                height: '150px',
+                background: 'radial-gradient(circle, rgba(255, 107, 157, 0.3) 0%, transparent 70%)',
+                borderRadius: '50%',
+                animation: 'letterGlow 1s ease-out'
+              }} />
             )}
           </div>
 
@@ -216,7 +286,7 @@ function ValentineDay({ onBack }) {
           </p>
 
           <button
-            className="button-secondary button"
+            className="button-secondary button liquid-glass-button"
             onClick={onBack}
             style={{ marginTop: '30px' }}
           >
@@ -227,101 +297,71 @@ function ValentineDay({ onBack }) {
     )
   }
 
-  // Timeline Stage
-  if (stage === 'timeline') {
-    const currentMemory = timelineMemories[timelineIndex]
-    
+  // Slideshow Stage
+  if (stage === 'slideshow') {
     return (
-      <div className="container">
-        <div className="card">
-          <h1 className="title">Our Love Story 💕</h1>
+      <div className="container liquid-glass-bg">
+        <div className="card liquid-glass slideshow-card">
+          <h1 className="title">Our Love Story 💖</h1>
           <p className="subtitle">
-            Every moment with you is a treasure
+            A beautiful journey through our memories together
           </p>
 
-          {/* Progress indicator */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '8px',
-            margin: '20px 0'
-          }}>
-            {timelineMemories.map((_, index) => (
-              <div
-                key={index}
-                style={{
-                  width: '40px',
-                  height: '6px',
-                  background: index <= timelineIndex 
-                    ? 'linear-gradient(90deg, #ff6b9d, #ff99cc)' 
-                    : '#e0e0e0',
-                  borderRadius: '3px',
-                  transition: 'all 0.3s ease'
-                }}
-              />
-            ))}
-          </div>
+          {/* Main Slideshow Container */}
+          <div className="slideshow-container">
+            {/* Main Image Display */}
+            <div className="slideshow-main">
+              <div className="slide-wrapper">
+                <div 
+                  className="slide-image-container"
+                  style={{
+                    backgroundImage: `url(${slideshowImages[currentSlide].src})`,
+                    animation: `slideInFade 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)`
+                  }}
+                >
+                  {/* Glass overlay with gradient */}
+                  <div className="slide-glass-overlay"></div>
+                  
+                  {/* Loading indicator while image loads */}
+                  {!loadedImages[currentSlide] && (
+                    <div className="image-loading">
+                      <div className="loading-spinner"></div>
+                      <p>Loading...</p>
+                    </div>
+                  )}
+                </div>
 
-          {/* Memory card */}
-          <div style={{
-            background: 'linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%)',
-            padding: '25px',
-            borderRadius: '20px',
-            margin: '25px 0',
-            animation: 'slideUp 0.5s ease',
-            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.06)',
-            border: '1px solid rgba(0, 0, 0, 0.05)'
-          }}>
-            <div style={{ fontSize: '3.5rem', marginBottom: '12px' }}>
-              {currentMemory.emoji}
+                {/* Navigation Arrows */}
+                <button className="slide-nav prev" onClick={prevSlide}>
+                  ❮
+                </button>
+                <button className="slide-nav next" onClick={nextSlide}>
+                  ❯
+                </button>
+              </div>
+
+              {/* Caption Area with Liquid Glass */}
+              <div className="slide-caption-container liquid-glass" style={{
+                animation: `captionSlideUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)`
+              }}>
+                <h3 className="slide-title">{slideshowImages[currentSlide].title}</h3>
+                <p className="slide-caption">{slideshowImages[currentSlide].caption}</p>
+              </div>
             </div>
-            
-            <h2 style={{ 
-              fontSize: '1.8rem', 
-              color: '#5a4a5f', 
-              marginBottom: '8px', 
-              fontWeight: '500',
-              fontFamily: 'var(--subheader-font)'
-            }}>
-              {currentMemory.title}
-            </h2>
-            
-            <p style={{ 
-              fontSize: '1.1rem', 
-              color: '#8a7a8f', 
-              marginBottom: '15px', 
-              fontStyle: 'italic',
-              fontFamily: 'var(--text-font)'
-            }}>
-              {currentMemory.date}
-            </p>
-
-            <p style={{ 
-              fontSize: '1.2rem', 
-              lineHeight: '1.8', 
-              color: '#5a4a5f',
-              fontFamily: 'var(--text-font)'
-            }}>
-              {currentMemory.note}
-            </p>
           </div>
 
-          {/* Navigation */}
-          <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            {timelineIndex > 0 && (
-              <button className="button-secondary button" onClick={handleTimelinePrevious}>
-                ← Previous
-              </button>
-            )}
-            <button className="button" onClick={handleTimelineNext}>
-              {timelineIndex < timelineMemories.length - 1 ? 'Next Memory →' : 'Continue to Love Jar 💕'}
-            </button>
-          </div>
+          <button 
+            className="button liquid-glass-button continue-btn" 
+            onClick={() => setStage('lovejar')}
+            style={{ marginTop: '30px', position: 'relative', zIndex: 20 }}
+          >
+            Continue to Love Jar 💕
+          </button>
 
           <button
-            className="button-secondary button"
+            className="button-secondary button liquid-glass-button"
             onClick={onBack}
-            style={{ marginTop: '20px' }}
+            style={{ marginTop: '15px' }}
           >
             ← Back to Days
           </button>
@@ -333,96 +373,177 @@ function ValentineDay({ onBack }) {
   // Love Jar Stage
   if (stage === 'lovejar') {
     return (
-      <div className="container">
-        <div className="card">
+      <div className="container liquid-glass-bg">
+        <div className="card liquid-glass">
           <h1 className="title">Why I Love You 💕</h1>
           <p className="subtitle">
             Pull out each note to discover all the reasons...
           </p>
 
-          {/* Jar */}
-          <div style={{
-            width: '250px',
-            height: '320px',
-            margin: '30px auto',
-            position: 'relative'
+          {/* Jar Container with 3D perspective */}
+          <div className="jar-container" style={{
+            width: '300px',
+            height: '420px',
+            margin: '40px auto',
+            position: 'relative',
+            perspective: '1200px'
           }}>
-            {/* Jar lid */}
-            <div style={{
-              width: '270px',
-              height: '30px',
-              background: 'linear-gradient(135deg, #8B4513 0%, #A0522D 100%)',
-              borderRadius: '15px 15px 5px 5px',
+            {/* Jar lid - metallic cap */}
+            <div className="jar-lid" style={{
+              width: '220px',
+              height: '40px',
+              background: 'linear-gradient(180deg, rgba(200, 120, 50, 1) 0%, rgba(160, 90, 30, 1) 50%, rgba(140, 70, 20, 1) 100%)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: '50% 50% 40% 40%',
               position: 'absolute',
-              top: '-10px',
-              left: '-10px',
-              boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
-              border: '3px solid #654321'
+              top: '-20px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.4), inset 0 2px 6px rgba(255, 255, 255, 0.3), inset 0 -2px 6px rgba(0, 0, 0, 0.3)',
+              border: '2px solid rgba(255, 255, 255, 0.3)',
+              zIndex: 10
             }} />
 
-            {/* Jar body */}
+            {/* Jar neck - connecting piece */}
             <div style={{
+              width: '160px',
+              height: '25px',
+              background: 'linear-gradient(180deg, rgba(200, 200, 200, 0.3) 0%, rgba(220, 220, 220, 0.2) 100%)',
+              position: 'absolute',
+              top: '15px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              borderRadius: '0 0 30px 30px',
+              boxShadow: 'inset 0 2px 8px rgba(0, 0, 0, 0.1)',
+              zIndex: 9
+            }} />
+
+            {/* Main jar body - glass container */}
+            <div className="jar-body" style={{
               width: '100%',
               height: '100%',
-              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 240, 245, 0.9) 100%)',
-              borderRadius: '15px',
+              background: 'linear-gradient(135deg, rgba(255, 250, 250, 0.65) 0%, rgba(255, 240, 245, 0.65) 50%, rgba(255, 230, 240, 0.65) 100%)',
+              backdropFilter: 'blur(25px)',
+              borderRadius: '40px 40px 80px 80px',
               position: 'relative',
-              boxShadow: 'inset 0 0 30px rgba(255, 182, 193, 0.3), 0 8px 25px rgba(0, 0, 0, 0.15)',
-              border: '4px solid rgba(255, 255, 255, 0.8)',
+              boxShadow: 'inset 0 0 60px rgba(255, 182, 193, 0.5), inset -20px 0 40px rgba(255, 200, 220, 0.3), 0 20px 60px rgba(0, 0, 0, 0.25)',
+              border: '4px solid rgba(255, 255, 255, 0.7)',
               overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              padding: '20px'
+              justifyContent: 'flex-end',
+              padding: '50px 25px 40px 25px'
             }}>
-              {/* Notes in jar */}
+              {/* Notes floating in jar */}
               {collectedNotes.length < loveNotes.length && (
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(3, 1fr)',
-                  gap: '8px',
-                  marginTop: '10px'
+                <div className="jar-notes" style={{
+                  position: 'absolute',
+                  width: '90%',
+                  height: '85%',
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  alignContent: 'flex-end',
+                  justifyContent: 'center',
+                  gap: '10px',
+                  padding: '20px',
+                  overflow: 'hidden'
                 }}>
-                  {Array.from({ length: Math.min(12, loveNotes.length - collectedNotes.length) }).map((_, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        width: '50px',
-                        height: '40px',
-                        background: ['#ffb3d9', '#ffd4c4', '#e5d4ff', '#d4f4dd'][i % 4],
-                        borderRadius: '5px',
-                        boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
-                        transform: `rotate(${Math.random() * 20 - 10}deg)`
-                      }}
-                    />
-                  ))}
+                  {Array.from({ length: Math.min(12, loveNotes.length - collectedNotes.length) }).map((_, i) => {
+                    const rotation = Math.random() * 30 - 15
+                    return (
+                      <div
+                        key={i}
+                        className="note-item"
+                        style={{
+                          width: '50px',
+                          height: '40px',
+                          background: ['linear-gradient(135deg, rgba(255, 179, 217, 1) 0%, rgba(255, 153, 204, 0.95) 100%)', 
+                                       'linear-gradient(135deg, rgba(255, 212, 196, 1) 0%, rgba(255, 182, 166, 0.95) 100%)', 
+                                       'linear-gradient(135deg, rgba(229, 212, 255, 1) 0%, rgba(209, 192, 235, 0.95) 100%)', 
+                                       'linear-gradient(135deg, rgba(212, 244, 221, 1) 0%, rgba(192, 224, 201, 0.95) 100%)'][i % 4],
+                          backdropFilter: 'blur(8px)',
+                          borderRadius: '6px',
+                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.5)',
+                          border: '1.5px solid rgba(255, 255, 255, 0.7)',
+                          animation: `floatNote ${4 + i * 0.15}s ease-in-out infinite`,
+                          animationDelay: `${i * 0.12}s`,
+                          '--rotation': `${rotation}deg`
+                        }}
+                      />
+                    )
+                  })}
                 </div>
               )}
 
               {collectedNotes.length === loveNotes.length && (
                 <div style={{
-                  fontSize: '4rem',
-                  marginTop: '80px'
+                  fontSize: '6rem',
+                  animation: 'heartBeat 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite',
+                  filter: 'drop-shadow(0 4px 12px rgba(255, 107, 157, 0.4))'
                 }}>
                   ❤️
                 </div>
               )}
             </div>
 
-            {/* Label */}
+            {/* Jar left side shine - creates glass effect */}
             <div style={{
               position: 'absolute',
-              bottom: '40px',
+              top: '40px',
+              left: '20px',
+              width: '70px',
+              height: '120px',
+              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, transparent 70%)',
+              borderRadius: '50%',
+              pointerEvents: 'none',
+              zIndex: 2,
+              filter: 'blur(8px)'
+            }} />
+
+            {/* Jar right side shadow - creates depth */}
+            <div style={{
+              position: 'absolute',
+              top: '60px',
+              right: '10px',
+              width: '50px',
+              height: '100px',
+              background: 'linear-gradient(225deg, transparent 0%, rgba(0, 0, 0, 0.15) 100%)',
+              borderRadius: '50%',
+              pointerEvents: 'none',
+              zIndex: 1,
+              filter: 'blur(10px)'
+            }} />
+
+            {/* Bottom highlight for jar base */}
+            <div style={{
+              position: 'absolute',
+              bottom: '15px',
               left: '50%',
               transform: 'translateX(-50%)',
-              background: 'rgba(255, 255, 255, 0.95)',
-              padding: '8px 15px',
-              borderRadius: '10px',
-              fontSize: '0.9rem',
-              fontWeight: '600',
+              width: '85%',
+              height: '30px',
+              background: 'linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.3) 100%)',
+              borderRadius: '50%',
+              pointerEvents: 'none',
+              zIndex: 2
+            }} />
+
+            {/* Label */}
+            <div className="liquid-glass jar-label" style={{
+              position: 'absolute',
+              bottom: '25px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              padding: '12px 24px',
+              borderRadius: '15px',
+              fontSize: '1rem',
+              fontWeight: '700',
               color: '#5a4a5f',
-              border: '2px solid #ff99cc',
-              whiteSpace: 'nowrap'
+              border: '2px solid rgba(255, 153, 204, 0.6)',
+              whiteSpace: 'nowrap',
+              zIndex: 8,
+              boxShadow: '0 4px 15px rgba(255, 107, 157, 0.2)'
             }}>
               💕 Love Notes 💕
             </div>
@@ -430,8 +551,7 @@ function ValentineDay({ onBack }) {
 
           {/* Current note display */}
           {collectedNotes.length > 0 && (
-            <div style={{
-              background: 'linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%)',
+            <div className="liquid-glass" style={{
               padding: '20px',
               borderRadius: '15px',
               margin: '20px 0',
@@ -440,7 +560,7 @@ function ValentineDay({ onBack }) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              border: '1px solid rgba(0, 0, 0, 0.05)'
+              border: '1px solid rgba(255, 255, 255, 0.3)'
             }}>
               <p style={{ 
                 fontSize: '1.2rem', 
@@ -456,7 +576,7 @@ function ValentineDay({ onBack }) {
 
           {/* Pull note button */}
           <button
-            className="button"
+            className="button liquid-glass-button"
             onClick={handlePullNote}
             disabled={collectedNotes.length === loveNotes.length}
             style={{
@@ -482,7 +602,7 @@ function ValentineDay({ onBack }) {
           )}
 
           <button
-            className="button-secondary button"
+            className="button-secondary button liquid-glass-button"
             onClick={onBack}
             style={{ marginTop: '20px' }}
           >
@@ -495,12 +615,12 @@ function ValentineDay({ onBack }) {
 
   // Final Message
   return (
-    <div className="container">
+    <div className="container liquid-glass-bg">
       {showConfetti && <Confetti />}
-      <div className="card">
+      <div className="card liquid-glass">
         <span className="emoji">❤️</span>
         <h1 className="title">Forever & Always</h1>
-        <div className="message">
+        <div className="message liquid-glass">
           My Dearest Megha,
           <br /><br />
           If you're reading this, you've journeyed through our love story, 
@@ -527,7 +647,7 @@ function ValentineDay({ onBack }) {
           <br />
           Rishabh 💖
         </div>
-        <button className="button" onClick={onBack} style={{ marginTop: '20px' }}>
+        <button className="button liquid-glass-button" onClick={onBack} style={{ marginTop: '20px' }}>
           Back to Days
         </button>
       </div>

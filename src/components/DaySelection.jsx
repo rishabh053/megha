@@ -25,6 +25,7 @@ function DaySelection({ onSelectDay }) {
   const isDayUnlocked = (day) => {
     const dayDate = new Date(2026, day.month, day.day)
     return currentDate >= dayDate
+     // return true
   }
 
   const isDayCompleted = (day) => {
